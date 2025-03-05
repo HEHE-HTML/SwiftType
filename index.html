@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SwiftType - Typing Speed Test</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .site-title {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 2.5em;
+            font-weight: 600;
+            color: var(--text-primary);
+            z-index: 1001;
+        }
+
+        .word-select {
+            position: absolute;
+            top: 80px;
+            /* Increased the top value to move it down */
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .word-select select {
+            background-color: #2C2C2C;
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+
+            background-position: right 10px center;
+        }
+
+        .word-select select:hover {
+            background-color: #383838;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="site-title">SwiftType</div>
+    <div class="word-select">
+        <select id="word-count-select">
+            <option value="10">10 Words</option>
+            <option value="25" selected>25 Words</option>
+            <option value="50">50 Words</option>
+        </select>
+    </div>
+    <div class="container">
+        <div id="test-container">
+            <div class="timer-progress-container">
+                <div id="timer">0s</div>
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+            </div>
+            <div id="text-display" class="text-input-container">
+            </div>
+        </div>
+        <div id="result-container" class="hidden">
+            <h1>Test Complete!</h1>
+            <div class="result-grid">
+                <div class="result-card">
+                    <h3>WPM</h3>
+                    <div id="wpm-result" class="result-value">0</div>
+                </div>
+                <div class="result-card">
+                    <h3>Accuracy</h3>
+                    <div id="accuracy-result" class="result-value">0%</div>
+                </div>
+                <div class="result-card">
+                    <h3>Time</h3>
+                    <div id="time-result" class="result-value">0s</div>
+                </div>
+                <div class="result-card">
+                    <h3>Correct Words</h3>
+                    <div id="correct-words" class="result-value">0/25</div>
+                </div>
+            </div>
+            <button id="restart-btn">Try Again</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -79,7 +79,20 @@ body {
     line-height: normal; /* Removes fixed height effect */
     align-content: flex-start; /* Aligns items to the start of the container */
 }
+.no-wrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
+.text-input-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.text-input-container::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 4px;
+}
 .cursor {
     color: var(--cursor-color);
     opacity: 0.7;

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>SwiftType - Typing Speed Test</title>
@@ -15,16 +14,17 @@
             color: var(--text-primary);
             z-index: 1001;
         }
-
-        .word-select {
+        
+        .selectors {
             position: absolute;
             top: 80px;
-            /* Increased the top value to move it down */
             left: 20px;
+            display: flex;
+            gap: 15px;
             z-index: 1000;
         }
-
-        .word-select select {
+        
+        .word-select select, .difficulty-select select {
             background-color: #2C2C2C;
             color: var(--text-primary);
             border: none;
@@ -36,25 +36,70 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-
-            background-position: right 10px center;
+        }
+        
+        .word-select select:hover, .difficulty-select select:hover {
+            background-color: #383838;
         }
 
-        .word-select select:hover {
-            background-color: #383838;
+        #enlarge-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2000;
+            transition: 
+                background-color 0.2s, 
+                transform 0.3s ease;
+        }
+
+        #enlarge-btn.enlarged {
+            background-color: #f44336;
+            transform: rotate(-180deg);
+        }
+
+        .container {
+            transition: transform 0.3s ease;
+        }
+
+        .container.enlarged {
+            transform: scale(1.25);
+        }
+
+        .container.shrinking {
+            transform: scale(1);
         }
     </style>
 </head>
-
 <body>
     <div class="site-title">SwiftType</div>
-    <div class="word-select">
-        <select id="word-count-select">
-            <option value="10">10 Words</option>
-            <option value="25" selected>25 Words</option>
-            <option value="50">50 Words</option>
-        </select>
+    <div class="selectors">
+        <div class="word-select">
+            <select id="word-count-select">
+                <option value="10">10 Words</option>
+                <option value="25" selected>25 Words</option>
+                <option value="50">50 Words</option>
+            </select>
+        </div>
+        <div class="difficulty-select">
+            <select id="difficulty-select">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
     </div>
+    
     <div class="container">
         <div id="test-container">
             <div class="timer-progress-container">
@@ -89,7 +134,55 @@
             <button id="restart-btn">Try Again</button>
         </div>
     </div>
+
+    <button id="enlarge-btn">+</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const enlargeBtn = document.getElementById('enlarge-btn');
+            const container = document.querySelector('.container');
+            
+            // Check saved state on page load
+            let isEnlarged = localStorage.getItem('containerEnlarged') === 'true';
+
+            // Apply saved state on page load
+            if (isEnlarged) {
+                container.classList.add('enlarged');
+                enlargeBtn.classList.add('enlarged');
+                enlargeBtn.textContent = '-';
+            }
+
+            enlargeBtn.addEventListener('click', () => {
+                if (isEnlarged) {
+                    // Shrinking
+                    container.classList.remove('enlarged');
+                    container.classList.add('shrinking');
+                    enlargeBtn.classList.remove('enlarged');
+                    enlargeBtn.textContent = '+';
+                    
+                    // Remove saved state
+                    localStorage.removeItem('containerEnlarged');
+                } else {
+                    // Enlarging
+                    container.classList.add('enlarged');
+                    container.classList.remove('shrinking');
+                    enlargeBtn.classList.add('enlarged');
+                    enlargeBtn.textContent = '-';
+                    
+                    // Save enlarged state
+                    localStorage.setItem('containerEnlarged', 'true');
+                }
+
+                // Toggle state
+                isEnlarged = !isEnlarged;
+
+                // Remove shrinking class after animation completes
+                setTimeout(() => {
+                    container.classList.remove('shrinking');
+                }, 300);
+            });
+        });
+    </script>
     <script src="script.js"></script>
 </body>
-
 </html>

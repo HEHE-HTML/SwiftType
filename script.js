@@ -281,7 +281,7 @@ class TypingTest {
     if (this.state.startTime === 0) {
       this.startTimer();
     }
-
+  
     if (
       event.key.length === 1 ||
       event.key === "Backspace" ||
@@ -297,7 +297,7 @@ class TypingTest {
       const currentWord = this.state.words[this.state.currentIndex];
       let activeWordElement =
         this.elements.textDisplay.children[this.state.currentIndex];
-
+  
       if (event.key === "Backspace") {
         if (this.state.currentInput.length > 0) {
           this.state.currentInput = this.state.currentInput.slice(0, -1);
@@ -310,10 +310,14 @@ class TypingTest {
           this.state.totalTypedChars++; // Count the space
         }
       } else {
-        this.state.currentInput += event.key;
-        this.state.totalTypedChars++;
+        // FIX: Only count character if it's within the word length or we're at the last character
+        // This prevents spam typing at the end of a word from artificially increasing char count
+        if (this.state.currentInput.length < currentWord.length) {
+          this.state.currentInput += event.key;
+          this.state.totalTypedChars++;
+        }
       }
-
+  
       // Update letter display in current word
       activeWordElement.innerHTML = "";
       for (let i = 0; i < currentWord.length; i++) {
@@ -328,12 +332,11 @@ class TypingTest {
         activeWordElement.appendChild(letter);
       }
       this.updateCursorPosition();
-
-      // Update progress bar
-      const progressPercentage =
-        ((this.state.currentIndex + (this.state.currentInput.length > 0 ? this.state.currentInput.length / currentWord.length : 0)) / this.state.totalWords) * 100;
+  
+      // Update progress bar based on completed words only
+      const progressPercentage = (this.state.currentIndex / this.state.totalWords) * 100;
       this.elements.progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
-
+  
       // Check if all characters have been typed correctly for the last word
       if (
         this.state.currentIndex === this.state.words.length - 1 &&
@@ -343,11 +346,41 @@ class TypingTest {
         this.state.currentIndex++; // Move past the last word
         this.endTest();
       }
-
+  
       // Alternative end condition: check if total typed characters equals expected characters
-      if (this.state.totalTypedChars >= this.state.totalExpectedChars) {
-        this.endTest();
+      // FIX: This shouldn't be needed if we count characters correctly, but leave it as a backup
+      if (this.state.currentIndex === this.state.words.length - 1) {
+        // If we're on the last word, check if we've typed it completely
+        if (this.state.currentInput.length === currentWord.length) {
+          const allCorrect = this.state.currentInput === currentWord;
+          if (allCorrect) {
+            this.checkWordAccuracy(currentWord, activeWordElement);
+            this.state.currentIndex++;
+            this.endTest();
+          }
+        }
       }
+    }
+  }
+  
+  moveToNextWord() {
+    let activeWordElement =
+      this.elements.textDisplay.children[this.state.currentIndex];
+    activeWordElement.classList.remove("active");
+    this.state.currentIndex++;
+    this.state.currentInput = "";
+  
+    if (this.state.currentIndex < this.state.words.length) {
+      this.elements.textDisplay.children[this.state.currentIndex].classList.add(
+        "active"
+      );
+      this.updateCursorPosition();
+      
+      // Update progress bar whenever we move to the next word
+      const progressPercentage = (this.state.currentIndex / this.state.totalWords) * 100;
+      this.elements.progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
+    } else {
+      this.endTest();
     }
   }
 
@@ -357,23 +390,6 @@ class TypingTest {
       this.state.correctWords++;
     } else {
       activeWordElement.classList.add("incorrect");
-    }
-  }
-
-  moveToNextWord() {
-    let activeWordElement =
-      this.elements.textDisplay.children[this.state.currentIndex];
-    activeWordElement.classList.remove("active");
-    this.state.currentIndex++;
-    this.state.currentInput = "";
-
-    if (this.state.currentIndex < this.state.words.length) {
-      this.elements.textDisplay.children[this.state.currentIndex].classList.add(
-        "active"
-      );
-      this.updateCursorPosition();
-    } else {
-      this.endTest();
     }
   }
 
@@ -436,24 +452,5 @@ class TypingTest {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const wordSelect = document.getElementById("word-count-select");
   const typingTest = new TypingTest(); // Create ONE instance here
-
-  wordSelect.addEventListener("change", (e) => {
-    const newWordCount = parseInt(e.target.value);
-
-    // Store the selected word count in localStorage
-    localStorage.setItem("selectedWordCount", newWordCount);
-
-    // Reload the page to reflect the new word count
-    location.reload();
-  });
-
-  // Retrieve the word count from localStorage when the page loads
-  const storedWordCount = localStorage.getItem("selectedWordCount");
-  if (storedWordCount) {
-    typingTest.state.totalWords = parseInt(storedWordCount);
-    typingTest.resetTest();
-    wordSelect.value = storedWordCount; // Keep the dropdown selection consistent
-  }
 });

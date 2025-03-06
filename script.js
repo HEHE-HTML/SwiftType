@@ -3,17 +3,17 @@ class TypingTest {
     // Comprehensive word lists for different difficulties
     this.wordLists = {
       easy: [
-  "the", "be", "of", "and", "a", "to", "in", "he", "have", "it", "that", "for", "they", "with", "as", "not", "on", "she", 
-  "at", "by", "this", "we", "you", "do", "but", "from", "or", "which", "one", "would", "all", "will", "there", "say", 
-  "who", "make", "when", "can", "more", "if", "no", "man", "out", "other", "so", "what", "time", "up", "go", "about", 
-  "than", "into", "could", "state", "only", "new", "year", "some", "take", "come", "these", "know", "see", "use", "get", 
-  "like", "then", "first", "any", "work", "now", "may", "such", "give", "over", "think", "most", "even", "find", "day", 
-  "also", "after", "way", "many", "must", "look", "before", "great", "back", "through", "long", "where", "much", "should", 
-  "well", "people", "down", "own", "just", "because", "good", "each", "those", "feel", "seem", "how", "high", "too", 
-  "place", "little", "world", "very", "still", "nation", "hand", "old", "life", "tell", "write", "become", "here", 
-  "show", "house", "both", "between", "need", "mean", "call", "develop", "under", "last", "right", "move", "thing", 
-  "general", "school", "never", "same", "another", "begin", "while", "number", "part", "turn", "real"
-],
+        "the", "be", "of", "and", "a", "to", "in", "he", "have", "it", "that", "for", "they", "with", "as", "not", "on", "she", 
+        "at", "by", "this", "we", "you", "do", "but", "from", "or", "which", "one", "would", "all", "will", "there", "say", 
+        "who", "make", "when", "can", "more", "if", "no", "man", "out", "other", "so", "what", "time", "up", "go", "about", 
+        "than", "into", "could", "state", "only", "new", "year", "some", "take", "come", "these", "know", "see", "use", "get", 
+        "like", "then", "first", "any", "work", "now", "may", "such", "give", "over", "think", "most", "even", "find", "day", 
+        "also", "after", "way", "many", "must", "look", "before", "great", "back", "through", "long", "where", "much", "should", 
+        "well", "people", "down", "own", "just", "because", "good", "each", "those", "feel", "seem", "how", "high", "too", 
+        "place", "little", "world", "very", "still", "nation", "hand", "old", "life", "tell", "write", "become", "here", 
+        "show", "house", "both", "between", "need", "mean", "call", "develop", "under", "last", "right", "move", "thing", 
+        "general", "school", "never", "same", "another", "begin", "while", "number", "part", "turn", "real"
+      ],
       medium: [
         "the", "be", "of", "and", "a", "to", "in", "he", "have", "it",
         "that", "for", "they", "with", "as", "not", "on", "she", "at", "by",
@@ -50,7 +50,7 @@ class TypingTest {
         "seat", "second", "secret", "section", "sector", "secure", "see", "seek", 
         "seem", "select", "sell", "send", "senior", "sense", "series", "serious", 
         "serve", "service", "session", "set", "setting", "seven", "several", 
-        "severe", "sex", "shape", "share", "sharp", "she", "shift", "shine", 
+        "severe", "shape", "share", "sharp", "she", "shift", "shine", 
         "ship", "shock", "shoot", "shop", "short", "shot", "should", "shoulder", 
         "show", "side", "sight", "sign", "signal", "simple", "since", "sing", 
         "single", "sink", "sit", "site", "situation", "six", "size", "skill", 
@@ -119,7 +119,6 @@ class TypingTest {
         "industrialization", "conglomeration", "exemplification", "reconciliation", "bureaucratization", "permutation", 
         "deliberation", "procrastination", "hyperbolic", "methodology", "existential", "magnanimous", "paramount", "effervescence"
       ]
-      
     };
 
     this.elements = {
@@ -148,6 +147,8 @@ class TypingTest {
       totalWords: 25,
       difficulty: "medium", // Default difficulty
       cursor: null,
+      totalTypedChars: 0,
+      totalExpectedChars: 0
     };
 
     this.initializeEventListeners();
@@ -226,6 +227,10 @@ class TypingTest {
     this.state.currentInput = "";
     this.state.currentIndex = 0;
     this.state.correctWords = 0;
+    this.state.totalTypedChars = 0;
+    
+    // Calculate total expected characters (including spaces between words)
+    this.state.totalExpectedChars = this.state.words.reduce((total, word) => total + word.length, 0) + this.state.words.length - 1;
 
     // Clear text display
     this.elements.textDisplay.innerHTML = "";
@@ -283,24 +288,33 @@ class TypingTest {
       event.key === " "
     ) {
       event.preventDefault();
+      
+      // Don't process input if the test is already complete
+      if (this.state.currentIndex >= this.state.words.length) {
+        return;
+      }
+      
       const currentWord = this.state.words[this.state.currentIndex];
       let activeWordElement =
         this.elements.textDisplay.children[this.state.currentIndex];
 
       if (event.key === "Backspace") {
-        this.state.currentInput = this.state.currentInput.slice(0, -1);
+        if (this.state.currentInput.length > 0) {
+          this.state.currentInput = this.state.currentInput.slice(0, -1);
+          this.state.totalTypedChars--;
+        }
       } else if (event.key === " ") {
         if (this.state.currentInput.length > 0) {
           this.checkWordAccuracy(currentWord, activeWordElement);
           this.moveToNextWord();
+          this.state.totalTypedChars++; // Count the space
         }
       } else {
-        // Allow continuing even if previous word was incorrect
-        if (this.state.currentInput.length < currentWord.length) {
-          this.state.currentInput += event.key;
-        }
+        this.state.currentInput += event.key;
+        this.state.totalTypedChars++;
       }
 
+      // Update letter display in current word
       activeWordElement.innerHTML = "";
       for (let i = 0; i < currentWord.length; i++) {
         const letter = document.createElement("span");
@@ -317,18 +331,25 @@ class TypingTest {
 
       // Update progress bar
       const progressPercentage =
-        ((this.state.currentIndex + 1) / this.state.totalWords) * 100;
-      this.elements.progressBar.style.width = `${progressPercentage}%`;
+        ((this.state.currentIndex + (this.state.currentInput.length > 0 ? this.state.currentInput.length / currentWord.length : 0)) / this.state.totalWords) * 100;
+      this.elements.progressBar.style.width = `${Math.min(progressPercentage, 100)}%`;
 
-      // Check if it's the last word
+      // Check if all characters have been typed correctly for the last word
       if (
-        this.state.currentIndex === this.state.words.length  &&
-        this.state.currentInput === this.state.words[this.state.currentIndex]
+        this.state.currentIndex === this.state.words.length - 1 &&
+        this.state.currentInput === currentWord
       ) {
+        this.checkWordAccuracy(currentWord, activeWordElement);
+        this.state.currentIndex++; // Move past the last word
+        this.endTest();
+      }
+
+      // Alternative end condition: check if total typed characters equals expected characters
+      if (this.state.totalTypedChars >= this.state.totalExpectedChars) {
         this.endTest();
       }
     }
-}
+  }
 
   checkWordAccuracy(currentWord, activeWordElement) {
     if (this.state.currentInput.trim() === currentWord) {
@@ -411,8 +432,6 @@ class TypingTest {
     this.elements.testContainer.classList.add("hidden");
     this.elements.resultContainer.classList.remove("hidden");
     this.elements.textDisplay.classList.add("no-wrap");
-
-    this.calculateResults();
   }
 }
 
@@ -438,6 +457,3 @@ document.addEventListener("DOMContentLoaded", () => {
     wordSelect.value = storedWordCount; // Keep the dropdown selection consistent
   }
 });
-const textContainer = document.querySelector('.text-input-container');
-const textInput = document.querySelector('#yourTextInput'); // Replace with actual input field selector
-
